@@ -5,9 +5,7 @@ output:
   html_document:
     keep_md: true
 ---
-```{r echo=FALSE}
-old.par<-par(no.readonly = TRUE)
-```
+
 ## Loading and preprocessing the data
 As basic preprocessing I create additional columns:
 
@@ -15,7 +13,8 @@ As basic preprocessing I create additional columns:
 * Interval in HH:MM format
 * Minutes from midnight
   
-```{r}
+
+```r
 library(stringr)
 library(scales)
 library(ggplot2)
@@ -33,65 +32,89 @@ AcData$MinFromMdn<-AcData$interval%/%100*60+
 
 
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 DataForHist<-aggregate(steps~dates,data=AcData,FUN=sum)
 hist(DataForHist$steps,xlab="Steps per day")
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
 Mean total number of steps taken per day:
-```{r echo=FALSE}
-mean(DataForHist$steps)
+
+```
+## [1] 10766.19
 ```
 
 Median total number of steps taken per day:
-```{r echo=FALSE}
-median(DataForHist$steps)
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 steps_by_intervals<-aggregate(steps~MinFromMdn+intervalt,data=AcData,FUN=mean)
 plot(steps_by_intervals$MinFromMdn,steps_by_intervals$steps,type="l",
      xlab="Interval, minutes from midnight", ylab="Steps")
 ```
+
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
   
 Interval with maximum average number of steps is from 
-```{r echo=FALSE}
-steps_by_intervals[which.max(steps_by_intervals[,3]),2]
+
+```
+## [1] "08:35"
 ```
 to
-```{r echo=FALSE}
-steps_by_intervals[which.max(steps_by_intervals[,3])+1,2]
+
+```
+## [1] "08:40"
 ```
 
 ## Imputing missing values
 Missing values in steps column were replaces with mean values for given time
 interval
   
-```{r}
+
+```r
 AcModData<-merge(AcData,steps_by_intervals,by = "MinFromMdn")
 NAData<-is.na(AcModData$steps.x)
 AcModData$steps.x[NAData]<-AcModData$steps.y[NAData]
 ModDataForHist<-aggregate(steps.x~dates,data=AcModData,FUN=sum)
 hist(ModDataForHist$steps.x,xlab="Steps per day, with imputed missing values")
+```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+
+```r
 par(mfrow = c(1, 2))
 boxplot(DataForHist$steps,main="Before imputing missing values")
 boxplot(ModDataForHist$steps.x, main="After imputing missing values")
+```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-2.png) 
+
+```r
 par(old.par)  
 ```
   
 Mean total number of steps taken per day (with imputed missing values):
-```{r echo=FALSE}
-mean(ModDataForHist$steps.x)
+
+```
+## [1] 10766.19
 ```
 
 Median total number of steps taken per day (with imputed missing values):
-```{r echo=FALSE}
-median(ModDataForHist$steps.x)
+
+```
+## [1] 10766.19
 ```
   
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r}
+
+```r
 AcData$WDay<-weekdays(AcData$dates)
 AcData$Wend<-ifelse(AcData$WDay=="суббота" | AcData$WDay=="воскресенье","weekend","weekday")
 steps_by_intervalsWD<-aggregate(steps~MinFromMdn+Wend,data=AcData,FUN=mean)
@@ -103,10 +126,10 @@ with(subset(steps_by_intervalsWD, Wend == "weekend"),
      plot(MinFromMdn, steps, type="l",main = "Weekend",
           xlab="Intervals, minutes from midnight"))
 ```
+
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
   
 As we can see from the plots - at weekend walking activity starts later in time,
 but steps are distributed evenly throughout the day.
 
-```{r echo=FALSE}
-par(old.par)
-```
+
